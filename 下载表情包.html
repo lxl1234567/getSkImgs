@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森空岛表情包下载</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .div {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sticker-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .sticker-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .sticker-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+        }
+
+        .sticker-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .sticker-card:hover .sticker-image {
+            transform: scale(1.05);
+        }
+
+        .sticker-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .sticker-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .sticker-count {
+            background: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .sticker-version {
+            background: #e3f2fd;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #1976d2;
+        }
+
+        .category-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* 预览弹窗样式 */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .preview-content {
+            position: relative;
+            max-width: 90%;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .preview-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #ff3742;
+        }
+
+        .sticker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .sticker-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .sticker-item:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+
+        .sticker-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sticker-item img:hover {
+            transform: scale(1.1);
+        }
+
+        .sticker-item .sticker-name {
+            font-size: 0.8rem;
+            color: #666;
+            word-break: break-word;
+        }
+
+        .fullscreen-preview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        .fullscreen-preview img {
+            max-width: 90%;
+            max-height: 90%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .div {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .sticker-card {
+                padding: 15px;
+            }
+
+            .sticker-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .sticker-item img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🎭 森空岛表情包</h1>
+        <p>点击卡片预览表情包，精选优质表情包一键下载收藏</p>
+    </div>
+
+    <div class="div" id="stickerContainer">
+        <div class="loading">正在加载表情包...</div>
+    </div>
+
+    <!-- 预览弹窗 -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <div class="preview-title" id="previewTitle"></div>
+                <button class="close-btn" onclick="closePreview()">✕ 关闭</button>
+            </div>
+            <div class="sticker-grid" id="stickerGrid"></div>
+        </div>
+    </div>
+
+    <!-- 全屏预览 -->
+    <div class="fullscreen-preview" id="fullscreenPreview" onclick="closeFullscreen()">
+        <img id="fullscreenImage" src="" alt="">
+    </div>
+
+        <script>
+            let list = [];
+        // 改为同步操作
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://zonai.skland.com/h5/v1/sticker-categories', false); // false 表示同步
+        try {
+            xhr.send(null);
+            if (xhr.status === 200) {
+                var res = JSON.parse(xhr.responseText);
+                console.log(res.data);
+                let emige = res.data.emoji;
+                list = res.data.list;
+                list.push(emige);
+            } else {
+                throw new Error('请求失败');
+            }
+        } catch (err) {
+            console.log(err);
+            list = [
+                {
+                    "categoryName": "skland_emoji",
+                    "title": "森空岛emoji",
+                    "version": 7,
+                    "cover": "skland_emoji__Wupa_plus1",
+                    "status": 2,
+                    "cdn": "https://bbs.hycdn.cn/asset/sticker",
+                    "zipUrl": "https://bbs.hycdn.cn/asset/emoji/skland_emoji_20250402170500.zip",
+                    "images": [
+                        {
+                            "id": "skland_emoji__Wupa_plus1",
+                            "title": "+1",
+                            "path": "2516c83a8efc9c74515c83bfda3d8f90.webp",
+                            "name": "Wupa_plus1.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_kiss",
+                            "title": "比心",
+                            "path": "240263b6ea257bb4442d97044b5c0558.webp",
+                            "name": "Wupa_kiss.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_love",
+                            "title": "爱你",
+                            "path": "446b80e80260098cce9e3ff5d612adfc.webp",
+                            "name": "Wow_love.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_ok",
+                            "title": "OK",
+                            "path": "485cb88fba15f6288911142ddfd7a14f.webp",
+                            "name": "Wow_ok.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_Awkward",
+                            "title": "流汗",
+                            "path": "136a2083a384d6e8d936eb5e4e645dbc.webp",
+                            "name": "Wupa_Awkward.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_question",
+                            "title": "¿",
+                            "path": "3df7196ba02684e47435cc2b8606a241.webp",
+                            "name": "Wow_question.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_praise",
+                            "title": "点赞",
+                            "path": "7200977b4d3e7d907b4a07852d18b3dc.webp",
+                            "name": "Wupa_praise.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_cool",
+                            "title": "酷",
+                            "path": "ea5ae66d06dc4f26f17835dc3fce61c5.webp",
+                            "name": "Wow_cool.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_faint",
+                            "title": "晕",
+                            "path": "5dbbee259fd76c7e9063067df6b7a4c5.webp",
+                            "name": "Wupa_faint.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_anger",
+                            "title": "红温",
+                            "path": "65565bf1657836a083c98bb28b2ff44d.webp",
+                            "name": "Wow_anger.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_cry",
+                            "title": "哭哭",
+                            "path": "29e5ac6283a7e13ae875268a454b001f.webp",
+                            "name": "Wupa_cry.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_die",
+                            "title": "寄",
+                            "path": "3d31e156f17e8157f01a737892b1e223.webp",
+                            "name": "Wupa_die.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_pinch",
+                            "title": "捏脸",
+                            "path": "4eee2bf94528c76e657f8a5e10ce930e.webp",
+                            "name": "Wow_pinch.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_love",
+                            "title": "LOVE",
+                            "path": "116038f73c8eb0157bf19ca73de1e48a.webp",
+                            "name": "Wupa_love.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_squat",
+                            "title": "蹲蹲",
+                            "path": "98de14d2f4dd171047b4a8922de3a45f.webp",
+                            "name": "Wow_squat.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_hammer",
+                            "title": "敲打",
+                            "path": "5603b7722e5fb4ea1474de752b95a3ae.webp",
+                            "name": "Wupa_hammer.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_sleep",
+                            "title": "睡觉",
+                            "path": "c8517ee61a88d662f19094ba246c1156.webp",
+                            "name": "Wupa_sleep.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_flower",
+                            "title": "开心",
+                            "path": "24ed9f4cf64217a3dbb19a42fb9d85cc.webp",
+                            "name": "Wupa_flower.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_music",
+                            "title": "悠闲",
+                            "path": "9d4a4088c38b0c89986dac43db32bcff.webp",
+                            "name": "Wupa_music.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_shy",
+                            "title": "害羞",
+                            "path": "33c34de8a94cfb4c090fe3320a320b29.webp",
+                            "name": "Wupa_shy.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_call",
+                            "title": "加油",
+                            "path": "bec5eb3929b458e8149609062fddc4df.webp",
+                            "name": "Wupa_call.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_petrochemical",
+                            "title": "石化",
+                            "path": "b22b0b87290dfcad5fd35e95f5f95e4e.webp",
+                            "name": "Wupa_petrochemical.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_shock",
+                            "title": "惊",
+                            "path": "a5051d36f7ebe3c577db389f666d0207.webp",
+                            "name": "Wupa_shock.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_annoyed",
+                            "title": "恼",
+                            "path": "f3cb92351a2928e84b8a99017265a0e2.webp",
+                            "name": "Wupa_annoyed.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wupa_celebrate",
+                            "title": "好耶",
+                            "path": "c679455ea343bac83a335a4ebf1695f1.webp",
+                            "name": "Wupa_celebrate.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_glance",
+                            "title": "灵魂拷问",
+                            "path": "ab5b0455102b7f50ef25850921362445.webp",
+                            "name": "Wow_glance.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_cry",
+                            "title": "呜呜呜",
+                            "path": "ce0936d638af5b4e35718ade85345368.webp",
+                            "name": "Wow_cry.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_yearning",
+                            "title": "星星眼",
+                            "path": "b851c0be908b6567afc5bbd81034e090.webp",
+                            "name": "Wow_yearning.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_Smile",
+                            "title": "呵呵",
+                            "path": "72870b39bfeea1ff58713eb7de5663b4.webp",
+                            "name": "Wow_Smile.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_Angel",
+                            "title": "安详",
+                            "path": "5f08a22051029f733e5cd48d400b59c9.webp",
+                            "name": "Wow_Angel.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_backview",
+                            "title": "行吧",
+                            "path": "abddd11077a07114b3aeee6e5b7328c9.webp",
+                            "name": "Wow_backview.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_NO",
+                            "title": "达咩",
+                            "path": "81e24871df0f22ec5cfaba099142d69e.webp",
+                            "name": "Wow_NO.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_Awkward",
+                            "title": "尬",
+                            "path": "02c411774b126a8938f41e3cb3ddaf50.webp",
+                            "name": "Wow_Awkward.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_Speechless",
+                            "title": "。。。",
+                            "path": "90e0a2522e3d9ab3f51701883b23b1f0.webp",
+                            "name": "Wow_Speechless.webp",
+                            "status": 2
+                        },
+                        {
+                            "id": "skland_emoji__Wow_frightened",
+                            "title": "害怕",
+                            "path": "a2022f7d36997c11325343f96b37c0fc.webp",
+                            "name": "Wow_frightened.webp",
+                            "status": 2
+                        }
+                    ],
+                    "coverV2": "https://bbs.hycdn.cn/asset/sticker/88599ecb4519c3ab3791a59fc9f83e88.png",
+                    "darkCover": "https://bbs.hycdn.cn/asset/sticker/101b810075014a6f2d59878852688418.png"
+                },
+                {
+                    "categoryName": "POPUCOM-1",
+                    "title": "泡姆泡姆系列一",
+                    "version": 2,
+                    "position": 1,
+                    "status": 2,
+                    "zipUrl": "https://bbs.hycdn.cn/asset/sticker/POPUCOM-1_20250530160828.zip",
+                    "cdn": "https://bbs.hycdn.cn/asset/sticker",
+                    "cover": "POPUCOM-1__POPUCOM_1_1",
+                    "images": [
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_1",
+                            "title": "疑惑",
+                            "path": "ab191ed1697b8c47d1cfa09a3f69fd4a.webp",
+                            "name": "POPUCOM_1_1.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_2",
+                            "title": "大喊",
+                            "path": "2c9176083e11267ab780443497201862.webp",
+                            "name": "POPUCOM_1_2.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_3",
+                            "title": "收到",
+                            "path": "cace5b953e041172e3cb735416144aed.webp",
+                            "name": "POPUCOM_1_3.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_4",
+                            "title": "遗憾离场",
+                            "path": "7773fecce0f398c83bda03fdabdef25c.webp",
+                            "name": "POPUCOM_1_4.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_5",
+                            "title": "cool",
+                            "path": "87a6cadf03d01978354961c6f6d29e49.webp",
+                            "name": "POPUCOM_1_5.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_6",
+                            "title": "晕",
+                            "path": "9602a405ba6444ca784fb87fa42d2ee3.webp",
+                            "name": "POPUCOM_1_6.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_7",
+                            "title": "拍手",
+                            "path": "75413e5675c1e86ac11dcf6fc8aad954.webp",
+                            "name": "POPUCOM_1_7.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_8",
+                            "title": "哎呦",
+                            "path": "3ea1e1e74c526b799fba8fa2d85a15d4.webp",
+                            "name": "POPUCOM_1_8.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_9",
+                            "title": "啦啦啦",
+                            "path": "0d27b50da2328f5f2e1805ce42f24e64.webp",
+                            "name": "POPUCOM_1_9.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_10",
+                            "title": "震惊",
+                            "path": "3912c4afabfa4e139e1f538adf855f25.webp",
+                            "name": "POPUCOM_1_10.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_11",
+                            "title": "加油",
+                            "path": "f52cfbbae80f621701c32e5cd46ee1c6.webp",
+                            "name": "POPUCOM_1_11.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_12",
+                            "title": "额",
+                            "path": "3af65fd11576351c390753ee43f00178.webp",
+                            "name": "POPUCOM_1_12.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_13",
+                            "title": "我吗",
+                            "path": "0415ed85cc841d73c3e5a950d46fcdff.webp",
+                            "name": "POPUCOM_1_13.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_14",
+                            "title": "石化",
+                            "path": "b1e65cfd088cbbfc5739405bff79be15.webp",
+                            "name": "POPUCOM_1_14.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_15",
+                            "title": "真相",
+                            "path": "a4afa196f338daf8c3ba65ab411fc5e0.webp",
+                            "name": "POPUCOM_1_15.webp"
+                        },
+                        {
+                            "id": "POPUCOM-1__POPUCOM_1_16",
+                            "title": "闪亮",
+                            "path": "3226152462ce03521fa5f94afac0f6ab.webp",
+                            "name": "POPUCOM_1_16.webp"
+                        }
+                    ],
+                    "coverV2": "https://bbs.hycdn.cn/asset/sticker/1a61e011ca6dc39d11ef8d839cc26852.webp",
+                    "labelId": 5,
+                    "subscribed": false
+                },
+                // ... 其余数据同原来
+            ];
+        }
+      
+        // 清空加载提示
+        document.getElementById('stickerContainer').innerHTML = '';
+
+        // 渲染表情包卡片
+        list.forEach((v, index) => {
+            const div = document.createElement("div");
+            div.className = "sticker-card";
+            div.innerHTML = `
+                <div class="category-tag">${v.categoryName}</div>
+                <img src="${v.coverV2}" alt="${v.title}" class="sticker-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjVGNUY1Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7lm77niYfliqDovb3lpLHotKU8L3RleHQ+Cjwvc3ZnPgo='">
+                <div class="sticker-title">${v.title}</div>
+                <div class="sticker-info">
+                    <span class="sticker-count">${v.images.length} 个表情</span>
+                    <span class="sticker-version">v${v.version}</span>
+                </div>
+                <a href="${v.zipUrl}" download="${v.title}.zip" class="download-btn">
+                    📥 下载表情包
+                </a>
+            `;
+            
+            // 添加点击事件（除了下载按钮）
+            div.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('download-btn')) {
+                    showPreview(v);
+                }
+            });
+            
+            document.getElementById('stickerContainer').appendChild(div);
+        });
+
+        // 显示预览弹窗
+        function showPreview(stickerData) {
+            document.getElementById('previewTitle').textContent = stickerData.title;
+            const stickerGrid = document.getElementById('stickerGrid');
+            stickerGrid.innerHTML = '';
+
+            // 渲染所有表情包
+            stickerData.images.forEach(image => {
+                const imageUrl = `${stickerData.cdn}/${image.path}`;
+                const stickerItem = document.createElement('div');
+                stickerItem.className = 'sticker-item';
+                stickerItem.innerHTML = `
+                    <img src="${imageUrl}" alt="${image.title}" 
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjVGNUY1Ii8+Cjx0ZXh0IHg9IjQwIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Zu+54mH5Yqg6L298L3RleHQ+Cjwvc3ZnPgo='"
+                         onclick="showFullscreen('${imageUrl}', '${image.title}')">
+                    <div class="sticker-name">${image.title}</div>
+                `;
+                stickerGrid.appendChild(stickerItem);
+            });
+
+            document.getElementById('previewModal').style.display = 'block';
+        }
+
+        // 关闭预览弹窗
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        // 显示全屏预览
+        function showFullscreen(imageUrl, title) {
+            document.getElementById('fullscreenImage').src = imageUrl;
+            document.getElementById('fullscreenImage').alt = title;
+            document.getElementById('fullscreenPreview').style.display = 'block';
+        }
+
+        // 关闭全屏预览
+        function closeFullscreen() {
+            document.getElementById('fullscreenPreview').style.display = 'none';
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('previewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreview();
+            }
+        });
+
+        // 添加下载统计
+        let downloadCount = 0;
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('download-btn')) {
+                downloadCount++;
+                e.target.textContent = `✅ 已下载 (${downloadCount})`;
+                e.target.style.background = '#4caf50';
+                
+                // 3秒后恢复原状
+                setTimeout(() => {
+                    e.target.textContent = '📥 下载表情包';
+                    e.target.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
