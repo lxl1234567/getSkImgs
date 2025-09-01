@@ -296,6 +296,7 @@
     <div class="header">
         <h1>🎭 森空岛表情包</h1>
         <p>点击卡片预览表情包，精选优质表情包一键下载收藏</p>
+        <div id="envNotice" style="margin-top: 10px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 20px; font-size: 0.9rem;"></div>
     </div>
 
     <div class="div" id="stickerContainer">
@@ -320,23 +321,17 @@
 
         <script>
             let list = [];
-        // 改为同步操作
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://zonai.skland.com/h5/v1/sticker-categories', false); // false 表示同步
-        try {
-            xhr.send(null);
-            if (xhr.status === 200) {
-                var res = JSON.parse(xhr.responseText);
-                console.log(res.data);
-                let emige = res.data.emoji;
-                list = res.data.list;
-                list.push(emige);
-            } else {
-                throw new Error('请求失败');
-            }
-        } catch (err) {
-            console.log(err);
-            list = [
+            
+            // 检测是否在 GitHub Pages 环境下
+            const isGitHubPages = window.location.hostname.includes('github.io') || 
+                                window.location.hostname.includes('github.com');
+            
+            if (isGitHubPages) {
+                console.log('检测到 GitHub Pages 环境，使用备用数据');
+                // 显示环境提示
+                document.getElementById('envNotice').innerHTML = '🌐 GitHub Pages 环境 - 使用备用数据，部分功能受限';
+                // 在 GitHub Pages 环境下直接使用备用数据
+                list = [
                 {
                     "categoryName": "skland_emoji",
                     "title": "森空岛emoji",
@@ -708,7 +703,45 @@
                 },
                 // ... 其余数据同原来
             ];
-        }
+            // 在 GitHub Pages 环境下直接渲染
+            renderStickers();
+            } else {
+                // 在本地环境下尝试请求 API
+                console.log('本地环境，尝试请求 API');
+                // 显示环境提示
+                document.getElementById('envNotice').innerHTML = '💻 本地环境 - 尝试连接 API 获取最新数据';
+                try {
+                    // 使用 fetch 替代 XMLHttpRequest，更好的错误处理
+                    fetch('https://zonai.skland.com/h5/v1/sticker-categories')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('网络请求失败');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('API 数据:', data);
+                            if (data.data && data.data.list) {
+                                let emige = data.data.emoji;
+                                list = data.data.list;
+                                if (emige) {
+                                    list.push(emige);
+                                }
+                                renderStickers();
+                            }
+                        })
+                        .catch(error => {
+                            console.log('API 请求失败，使用备用数据:', error);
+                            renderStickers();
+                        });
+                } catch (error) {
+                    console.log('请求异常，使用备用数据:', error);
+                    renderStickers();
+                }
+            }
+            
+            // 渲染表情包函数
+            function renderStickers() {
       
         // 清空加载提示
         document.getElementById('stickerContainer').innerHTML = '';
@@ -725,9 +758,9 @@
                     <span class="sticker-count">${v.images.length} 个表情</span>
                     <span class="sticker-version">v${v.version}</span>
                 </div>
-                <a href="${v.zipUrl}" download="${v.title}.zip" class="download-btn">
+                <button class="download-btn" onclick="downloadSticker('${v.zipUrl}', '${v.title}')">
                     📥 下载表情包
-                </a>
+                </button>
             `;
             
             // 添加点击事件（除了下载按钮）
@@ -739,6 +772,7 @@
             
             document.getElementById('stickerContainer').appendChild(div);
         });
+        }
 
         // 显示预览弹窗
         function showPreview(stickerData) {
@@ -787,6 +821,44 @@
             }
         });
 
+        // 下载表情包函数
+        function downloadSticker(zipUrl, title) {
+            let downloadCount = 0;
+            
+            // 在 GitHub Pages 环境下，显示提示信息
+            if (isGitHubPages) {
+                alert(`由于 GitHub Pages 的限制，无法直接下载文件。\n\n请复制以下链接到浏览器地址栏手动下载：\n${zipUrl}`);
+                return;
+            }
+            
+            // 在本地环境下尝试下载
+            try {
+                // 创建一个隐藏的 a 标签来触发下载
+                const link = document.createElement('a');
+                link.href = zipUrl;
+                link.download = `${title}.zip`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 更新下载按钮状态
+                const btn = event.target;
+                downloadCount++;
+                btn.textContent = `✅ 已下载 (${downloadCount})`;
+                btn.style.background = '#4caf50';
+                
+                // 3秒后恢复原状
+                setTimeout(() => {
+                    btn.textContent = '📥 下载表情包';
+                    btn.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
+                }, 3000);
+            } catch (error) {
+                console.error('下载失败:', error);
+                alert('下载失败，请检查网络连接或手动复制链接下载');
+            }
+        }
+        
         // 添加下载统计
         let downloadCount = 0;
         document.addEventListener('click', function(e) {
